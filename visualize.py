@@ -69,7 +69,7 @@ def _visualize(volume: np.ndarray):
 
     ax.volume = volume.T
     ax.index = ax.volume.shape[0] // 2
-    ax.imshow(ax.volume[ax.index], cmap="bone")
+    ax.imshow(ax.volume[ax.index], cmap="gray")
 
     plt.axis("off")
     plt.show()
