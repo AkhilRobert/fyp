@@ -29,9 +29,6 @@ class DiceLoss(nn.Module):
         if softmax:
             inputs = torch.softmax(inputs, dim=1)
         target = self._one_hot_encoder(target)
-        print(target)
-        print(inputs)
-        # exit(0)
         if weight is None:
             weight = [1] * self.n_classes
         assert (
@@ -48,13 +45,15 @@ class DiceLoss(nn.Module):
         return loss / self.n_classes
 
 
-if __name__ == "__main__":
-    loss = DiceLoss(2)
-    t = torch.tensor([1, 2])
-    p = torch.tensor([[0, 1], [1, 0]])
-    print(
-        loss(
-            p,
-            t,
-        )
-    )
+class CeDiceLoss(nn.Module):
+    def __init__(self, num_classes, loss_weight=[0.4, 0.6]):
+        super(CeDiceLoss, self).__init__()
+        self.celoss = nn.CrossEntropyLoss()
+        self.diceloss = DiceLoss(num_classes)
+        self.loss_weight = loss_weight
+
+    def forward(self, pred, target):
+        loss_ce = self.celoss(pred, target[:].long())
+        loss_dice = self.diceloss(pred, target, softmax=True)
+        loss = self.loss_weight[0] * loss_ce + self.loss_weight[1] * loss_dice
+        return loss

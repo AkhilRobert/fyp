@@ -3,3 +3,6 @@ venv
 .ipynb_checkpoints/
 .tool-versions
 __pycache__/
+output/
+pre_trained_weights/
+results/

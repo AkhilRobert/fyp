@@ -1,11 +1,11 @@
 import glob
+import os
 
+import matplotlib.pyplot as plt
 import nibabel
 import numpy as np
-import torch
-import torch.nn.functional as F
+import splitfolders
 # from keras.utils import to_categorical
-from matplotlib.pyplot import imshow
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 
@@ -15,7 +15,7 @@ scaler = MinMaxScaler()
 def has_data(slice):
     if (
         1 - (slice[0] / slice.sum())
-    ) > 0.001:  # At least 0.1% useful volume with labels that are not 0
+    ) > 0.01:  # At least 0.1% useful volume with labels that are not 0
         return True
     else:
         return False
@@ -54,6 +54,7 @@ seg_list = sorted(glob.glob("./data/unprocessed/BraTS2021_*/*seg.nii.gz"))
 
 assert len(t2_list) == len(t1ce_list) == len(flair_list) == len(seg_list)
 
+c = 1
 for i in tqdm(range(len(t2_list)), ascii=True):
     t2 = nibabel.load(t2_list[i]).get_fdata()
     t1ce = nibabel.load(t1ce_list[i]).get_fdata()
@@ -71,20 +72,17 @@ for i in tqdm(range(len(t2_list)), ascii=True):
     # Create a multichannel image from the from the mri scans
     combined = np.stack([t2, t1ce, flair])
 
-    if True:
-        # Cropping out unwanted pieces of the image
-        combined = combined[56:184, 56:184, 13:141]
-        seg = seg[56:184, 56:184, 13:141]
+    combined = combined[56:184, 56:184, 13:141]
+    seg = seg[56:184, 56:184, 13:141]
 
-    mask = to_categorical(seg, 4)
-
-    c = 0
     for j in range(len(t2_list[-1])):
         val, count = np.unique(seg[:, :, j], return_counts=True)
 
         if not has_data(count):
             continue
 
-        np.save(f"./data/processed/images/mri_{i}_{c}.npy", combined)
-        np.save(f"./data/processed/masks/mri_{i}_{c}.npy", mask[:, :, j, :])
+        np.save(f"./data/processed/images/image_{c}.npy", combined[:, :, j])
+        np.save(f"./data/processed/masks/mask_{c}.npy", seg[:, :, j])
         c += 1
+
+splitfolders.ratio("./data/processed/", ratio=(0.7, 0.2, 0.1))
