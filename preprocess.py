@@ -70,10 +70,13 @@ for i in tqdm(range(len(t2_list)), ascii=True):
     seg[seg == 4] = 3
 
     # Create a multichannel image from the from the mri scans
-    combined = np.stack([t2, t1ce, flair])
+    combined = np.stack([t2, t1ce, flair], axis=3)
 
-    combined = combined[56:184, 56:184, 13:141]
-    seg = seg[56:184, 56:184, 13:141]
+    mix = 20
+    max = 212
+
+    combined = combined[mix:max, mix:max, 13:141]
+    seg = seg[mix:max, mix:max, 13:141]
 
     for j in range(len(t2_list[-1])):
         val, count = np.unique(seg[:, :, j], return_counts=True)
@@ -85,4 +88,4 @@ for i in tqdm(range(len(t2_list)), ascii=True):
         np.save(f"./data/processed/masks/mask_{c}.npy", seg[:, :, j])
         c += 1
 
-splitfolders.ratio("./data/processed/", ratio=(0.7, 0.2, 0.1))
+splitfolders.ratio("./data/processed/", ratio=(0.9, 0.1))

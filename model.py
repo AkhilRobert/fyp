@@ -761,7 +761,7 @@ class VSSM(nn.Module):
         return x
 
 
-class VMUNet(nn.Module):
+class UNet(nn.Module):
     def __init__(
         self,
         input_channels=3,
@@ -800,10 +800,8 @@ class VMUNet(nn.Module):
         model_dict = self.vmunet.state_dict()
         modelCheckpoint = torch.load(self.load_ckpt_path)
         pretrained_dict = modelCheckpoint["model"]
-        # 过滤操作
         new_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
         model_dict.update(new_dict)
-        # 打印出来，更新了多少的参数
         print(
             "Total model_dict: {}, Total pretrained_dict: {}, update: {}".format(
                 len(model_dict), len(pretrained_dict), len(new_dict)
@@ -834,10 +832,8 @@ class VMUNet(nn.Module):
             elif "layers.3" in k:
                 new_k = k.replace("layers.3", "layers_up.0")
                 pretrained_dict[new_k] = v
-        # 过滤操作
         new_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
         model_dict.update(new_dict)
-        # 打印出来，更新了多少的参数
         print(
             "Total model_dict: {}, Total pretrained_dict: {}, update: {}".format(
                 len(model_dict), len(pretrained_dict), len(new_dict)
@@ -845,7 +841,6 @@ class VMUNet(nn.Module):
         )
         self.vmunet.load_state_dict(model_dict)
 
-        # 找到没有加载的键(keys)
         not_loaded_keys = [
             k for k in pretrained_dict.keys() if k not in new_dict.keys()
         ]

@@ -15,7 +15,7 @@ class Settings:
         "load_ckpt_path": "./pre_trained_weights/vmamba_small_e238_ema.pth",
     }
 
-    data_path = "./output/"
+    data_path = "output/"
 
     criterion = CeDiceLoss(4)
 
@@ -23,18 +23,18 @@ class Settings:
 
     work_dir = (
         "results/"
-        + "VMUnet"
+        + "Unet"
         + "_"
         + datasets
         + "_"
-        + datetime.now().strftime("%A_%d_%B_%Y_%Hh_%Mm_%Ss")
+        + datetime.now().strftime("%A_%d_%B_%Y")
         + "/"
     )
 
     pretrained_path = "./pre_trained/"
     num_classes = 4
-    input_size_h = 128
-    input_size_w = 128
+    input_size_h = 192
+    input_size_w = 192
     input_channels = 3
     distributed = False
     local_rank = -1
@@ -44,8 +44,8 @@ class Settings:
     rank = None
     amp = False
     gpu_id = "0"
-    batch_size = 35  # TODO: This is needs to be changed
-    epochs = 5  # TODO: This is needs to be changed
+    batch_size = 12
+    epochs = 10
 
     print_interval = 20
     val_interval = 30

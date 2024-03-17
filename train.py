@@ -1,18 +1,19 @@
+import datetime
 import os
 import sys
+import time
 import warnings
 
 # import timm
 import torch
-# from engine import *
 from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
 
 from config import Settings
 from dataset import BraTSDataset
 from engine import train_one_epoch, val_one_epoch
-from model import VMUNet
-from utils import get_logger, log_config_info
+from model import UNet
+from utils import get_logger, log_config_info, set_seed
 
 warnings.filterwarnings("ignore")
 
@@ -39,7 +40,7 @@ def main(config):
 
     print("#----------GPU init----------#")
     os.environ["CUDA_VISIBLE_DEVICES"] = config.gpu_id
-    # set_seed(config.seed)
+    set_seed(config.seed)
     torch.cuda.empty_cache()
 
     print("#----------Preparing dataset----------#")
@@ -63,7 +64,7 @@ def main(config):
 
     print("#----------Prepareing Model----------#")
     model_cfg = config.model_config
-    model = VMUNet(
+    model = UNet(
         num_classes=model_cfg["num_classes"],
         input_channels=model_cfg["input_channels"],
         depths=model_cfg["depths"],
@@ -91,6 +92,8 @@ def main(config):
     start_epoch = 1
     min_epoch = 1
 
+    result = 0
+
     if os.path.exists(resume_model):
         print("#----------Resume Model and Other params----------#")
         checkpoint = torch.load(resume_model, map_location=torch.device("cpu"))
@@ -105,11 +108,12 @@ def main(config):
             checkpoint["loss"],
         )
 
-        # log_info = f"resuming model from {resume_model}. resume_epoch: {saved_epoch}, min_loss: {min_loss:.4f}, min_epoch: {min_epoch}, loss: {loss:.4f}"
-        # logger.info(log_info)
+        log_info = f"resuming model from {resume_model}. resume_epoch: {saved_epoch}, min_loss: {min_loss:.4f}, min_epoch: {min_epoch}, loss: {result:.4f}"
+        logger.info(log_info)
 
     max_result = 0.6
     step = 0
+    st = time.time()
     print("#----------Training----------#")
     for epoch in range(start_epoch, config.epochs + 1):
 
@@ -128,9 +132,16 @@ def main(config):
             writer,
         )
 
-        result, _ = val_one_epoch(val_loader, model, criterion, epoch, logger, config)
+        et = time.time()
+        print(
+            f"time taken for training current epoch is {datetime.timedelta(seconds=et - st)}"
+        )
 
-        print(f"The current loss of the segmentation is {result}")
+        dc_score, hdf = val_one_epoch(
+            val_loader, model, criterion, epoch, logger, config
+        )
+
+        print(f"The current dice score is {dc_score} and distance is {hdf}")
 
         if result > max_result:
             torch.save(model.state_dict(), os.path.join(checkpoint_dir, "best.pth"))
@@ -149,6 +160,7 @@ def main(config):
             },
             os.path.join(checkpoint_dir, "latest.pth"),
         )
+        st = time.time()
 
     # if os.path.exists(os.path.join(checkpoint_dir, "best.pth")):
     #     print("#----------Testing----------#")
