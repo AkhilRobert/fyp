@@ -25,7 +25,6 @@ def random_flip_90(img, msk):
     return image, mask
 
 
-# TODO: Data Augmentation
 class RandomGenerator:
     def __init__(self, width, height):
         self.width = width

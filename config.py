@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 from loss import CeDiceLoss
 
@@ -21,15 +20,7 @@ class Settings:
 
     datasets = "BraTS"
 
-    work_dir = (
-        "results/"
-        + "Unet"
-        + "_"
-        + datasets
-        + "_"
-        + datetime.now().strftime("%A_%d_%B_%Y")
-        + "/"
-    )
+    work_dir = "results/" + "Unet" + "_" + datasets + "_" + "100" + "_192_2" + "/"
 
     pretrained_path = "./pre_trained/"
     num_classes = 4
@@ -44,8 +35,8 @@ class Settings:
     rank = None
     amp = False
     gpu_id = "0"
-    batch_size = 12
-    epochs = 10
+    batch_size = 18
+    epochs = 1500
 
     print_interval = 20
     val_interval = 30

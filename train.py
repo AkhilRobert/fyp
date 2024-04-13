@@ -81,10 +81,8 @@ def main(config):
     optimizer = torch.optim.AdamW(
         model.parameters(),
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer,
-        T_max=50,
-        eta_min=0.00001,
+    scheduler = torch.optim.lr_scheduler.PolynomialLR(
+        optimizer, total_iters=config.epochs
     )
 
     print("#----------Set other params----------#")
@@ -111,7 +109,7 @@ def main(config):
         log_info = f"resuming model from {resume_model}. resume_epoch: {saved_epoch}, min_loss: {min_loss:.4f}, min_epoch: {min_epoch}, loss: {result:.4f}"
         logger.info(log_info)
 
-    max_result = 0.6
+    max_accuracy = 0.7
     step = 0
     st = time.time()
     print("#----------Training----------#")
@@ -143,9 +141,10 @@ def main(config):
 
         print(f"The current dice score is {dc_score} and distance is {hdf}")
 
-        if result > max_result:
+        if dc_score > max_accuracy:
+            print("saving the best model")
             torch.save(model.state_dict(), os.path.join(checkpoint_dir, "best.pth"))
-            max_result = result
+            max_accuracy = dc_score
             min_epoch = epoch
 
         torch.save(
