@@ -28,13 +28,13 @@ def main(config):
     model.load_state_dict(weights)
 
     t2 = nibabel.load(
-        "./data/unprocessed/BraTS2021_00003/BraTS2021_00003_t2.nii.gz"
+        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_t2.nii.gz"
     ).get_fdata()
     t1 = nibabel.load(
-        "./data/unprocessed/BraTS2021_00003/BraTS2021_00003_t1ce.nii.gz"
+        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_t1ce.nii.gz"
     ).get_fdata()
     flair = nibabel.load(
-        "./data/unprocessed/BraTS2021_00003/BraTS2021_00003_flair.nii.gz"
+        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_flair.nii.gz"
     ).get_fdata()
 
     t2 = normalize(t2).astype(np.float32)
@@ -45,8 +45,8 @@ def main(config):
     # resized_img = resize(
     #     combined, (config.input_size_w, config.input_size_h, t2.shape[-1])
     # )
-    mix = 20
-    max = 212
+    mix = Settings.mix
+    max = Settings.max
 
     resized_img = combined[mix:max, mix:max, :]
 

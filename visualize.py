@@ -47,7 +47,10 @@ def _process_key(event: KeyEvent):
 
 def _update_scroll(idx: int, fig: Figure):
     ax = fig.axes[0]
-    ax.images[0].set_array(ax.volume[idx])
+    vol = ax.volume[idx]
+    ax.images[0].set_array(vol)
+    print(vol.shape)
+    # print(np.unique(vol, return_counts=True)[1])
     fig.canvas.draw()
 
 
@@ -69,7 +72,7 @@ def _visualize(volume: np.ndarray):
 
     ax.volume = volume.T
     ax.index = ax.volume.shape[0] // 2
-    ax.imshow(ax.volume[ax.index], cmap="gray")
+    ax.imshow(ax.volume[ax.index])
 
     plt.axis("off")
     plt.show()

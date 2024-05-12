@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from loss import CeDiceLoss
+from loss import CeDiceLoss, FocalDiceLoss
 
 
 @dataclass
@@ -8,24 +8,36 @@ class Settings:
     model_config = {
         "num_classes": 4,
         "input_channels": 3,
-        "depths": [2, 2, 2, 2],
-        "depths_decoder": [2, 2, 2, 1],
+        "depths": [2, 2, 9, 2],
+        "depths_decoder": [2, 2, 9, 2],
+        # "depths": [2, 2, 2, 2],
+        # "depths_decoder": [2, 2, 2, 1],
         "drop_path_rate": 0.2,
         "load_ckpt_path": "./pre_trained_weights/vmamba_small_e238_ema.pth",
     }
 
     data_path = "output/"
 
-    criterion = CeDiceLoss(4)
+    criterion = FocalDiceLoss(4)
 
     datasets = "BraTS"
 
-    work_dir = "results/" + "Unet" + "_" + datasets + "_" + "100" + "_192_2" + "/"
+    work_dir = (
+        "results/" + "Unet" + "_" + datasets + "_" + "100" + "_128_1" + "review_3" + "/"
+    )
+
+    # 128 x 128
+    mix = 56
+    max = 184
+
+    # 192 x 192
+    # mix = 20
+    # max = 212
 
     pretrained_path = "./pre_trained/"
     num_classes = 4
-    input_size_h = 192
-    input_size_w = 192
+    input_size_h = 128
+    input_size_w = 128
     input_channels = 3
     distributed = False
     local_rank = -1
@@ -35,7 +47,7 @@ class Settings:
     rank = None
     amp = False
     gpu_id = "0"
-    batch_size = 18
+    batch_size = 10
     epochs = 1500
 
     print_interval = 20

@@ -6,13 +6,15 @@ import splitfolders
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 
+from config import Settings
+
 scaler = MinMaxScaler()
 
 
 def has_data(slice):
     if (
         1 - (slice[0] / slice.sum())
-    ) > 0.08:  # At least 1% useful volume with labels that are not 0
+    ) > 0.1:  # At least 1% useful volume with labels that are not 0
         return True
     else:
         return False
@@ -70,8 +72,8 @@ if __name__ == "__main__":
         # Create a multichannel image from the from the mri scans
         combined = np.stack([t2, t1ce, flair], axis=3)
 
-        mix = 20
-        max = 212
+        mix = Settings.mix
+        max = Settings.max
 
         combined = combined[
             mix:max,
