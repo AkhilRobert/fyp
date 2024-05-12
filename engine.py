@@ -93,3 +93,59 @@ def val_one_epoch(test_loader, model, criterion, epoch, logger, config):
         dice = np.mean(metrics_list, axis=0)[0]
         h95 = np.mean(metrics_list, axis=0)[1]
         return dice, h95
+
+
+def val_one_epoch__prec_recall(test_loader, model, criterion, epoch, logger, config):
+    # switch to evaluate mode
+    model.eval()
+    preds = []
+    gts = []
+    loss_list = []
+    with torch.no_grad():
+        for data in tqdm(test_loader):
+            img, msk = data
+            img, msk = (
+                img.cuda(non_blocking=True).float(),
+                msk.cuda(non_blocking=True).float(),
+            )
+
+            out = model(img)
+            loss = criterion(out, msk)
+
+            loss_list.append(loss.item())
+            gts.append(msk.squeeze(1).cpu().detach().numpy())
+            if type(out) is tuple:
+                out = out[0]
+            out = out.squeeze(1).cpu().detach().numpy()
+            preds.append(out)
+
+    if epoch % config.val_interval == 0:
+        preds = np.array(preds).reshape(-1)
+        gts = np.array(gts).reshape(-1)
+
+        y_pre = np.where(preds >= config.threshold, 1, 0)
+        y_true = np.where(gts >= 0.5, 1, 0)
+
+        from sklearn.metrics import confusion_matrix
+
+        confusion = confusion_matrix(y_true, y_pre)
+        TN, FP, FN, TP = (
+            confusion[0, 0],
+            confusion[0, 1],
+            confusion[1, 0],
+            confusion[1, 1],
+        )
+
+        precision = float(TP) / float(TP + TN)
+        recall = float(TP) / float(TP + FN)
+
+        log_info = f"val epoch: {epoch}, loss: {np.mean(loss_list)} precision: {precision}, recall: {recall}"
+        print(log_info)
+        logger.info(log_info)
+
+    else:
+        log_info = f"val epoch: {epoch}, loss: {np.mean(loss_list):.4f}"
+        print(log_info)
+        logger.info(log_info)
+
+    return np.mean(loss_list)
