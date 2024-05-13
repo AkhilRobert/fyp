@@ -134,9 +134,9 @@ def render(slider, state):
     ), (
             resized_img[:, :, slider, 2],
             [
-                (seg_data[:, :, world["current"]] == 1, "tumor core"),
-                (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
-                (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
+                (seg_data[:, :, slider] == 1, "tumor core"),
+                (seg_data[:, :, slider] == 2, "peritumoral edema"),
+                (seg_data[:, :, slider] == 3, "enchancing tumor"),
             ],
         )]
     
