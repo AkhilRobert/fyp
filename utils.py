@@ -7,13 +7,7 @@ import torch
 import torch.backends.cudnn as cudnn
 
 
-def get_logger(name, log_dir):
-    """
-    Args:
-        name(str): name of logger
-        log_dir(str): path of log
-    """
-
+def get_logger(name, log_dir, save_log=False, content_to_save=None):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
@@ -33,6 +27,10 @@ def get_logger(name, log_dir):
     info_handler.setFormatter(formatter)
 
     logger.addHandler(info_handler)
+
+    if save_log:
+        with open(log_dir + "log.txt", "a") as f:
+            f.write(content_to_save)
 
     return logger
 

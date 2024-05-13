@@ -141,7 +141,7 @@ def val_one_epoch__prec_recall(test_loader, model, criterion, epoch, logger, con
 
         log_info = f"val epoch: {epoch}, loss: {np.mean(loss_list)} precision: {precision}, recall: {recall}"
         print(log_info)
-        logger.info(log_info)
+        logger.info(log_info, save_log=True, content_to_save=log_info)
 
     else:
         log_info = f"val epoch: {epoch}, loss: {np.mean(loss_list):.4f}"

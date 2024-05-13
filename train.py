@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from config import Settings
 from dataset import BraTSDataset
-from engine import train_one_epoch, val_one_epoch
+from engine import train_one_epoch, val_one_epoch, val_one_epoch__prec_recall
 from model import UNet
 from utils import get_logger, log_config_info, set_seed
 
@@ -147,6 +147,11 @@ def main(config):
             max_accuracy = dc_score
             min_epoch = epoch
 
+            # save the precision and recall
+            val_one_epoch__prec_recall(
+                val_loader, model, criterion, epoch, logger, config
+            )
+
         torch.save(
             {
                 "epoch": epoch,
@@ -160,26 +165,6 @@ def main(config):
             os.path.join(checkpoint_dir, "latest.pth"),
         )
         st = time.time()
-
-    # if os.path.exists(os.path.join(checkpoint_dir, "best.pth")):
-    #     print("#----------Testing----------#")
-    #     best_weight = torch.load(
-    #         config.work_dir + "checkpoints/best.pth", map_location=torch.device("cpu")
-    #     )
-    #     model.load_state_dict(best_weight)
-    #     loss = test_one_epoch(
-    #         val_loader,
-    #         model,
-    #         criterion,
-    #         logger,
-    #         config,
-    #     )
-    #     os.rename(
-    #         os.path.join(checkpoint_dir, "best.pth"),
-    #         os.path.join(
-    #             checkpoint_dir, f"best-epoch{min_epoch}-loss{min_loss:.4f}.pth"
-    #         ),
-    #     )
 
 
 if __name__ == "__main__":
