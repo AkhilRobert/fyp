@@ -99,22 +99,24 @@ def load_data(t1ce, t2, flair, seg):
     world["final_image"] = final_image
     world["original"] = seg_data
 
-    return [(
-        resized_img[:, :, world["current"], 2],
-        [
-            (final_image[:, :, world["current"]] == 1, "tumor core"),
-            (final_image[:, :, world["current"]] == 2, "peritumoral edema"),
-            (final_image[:, :, world["current"]] == 3, "enchancing tumor"),
-        ],
-    ), (
-         resized_img[:, :, world["current"], 2],
+    return [
+        (
+            resized_img[:, :, world["current"], 2],
+            [
+                (final_image[:, :, world["current"]] == 1, "tumor core"),
+                (final_image[:, :, world["current"]] == 2, "peritumoral edema"),
+                (final_image[:, :, world["current"]] == 3, "enchancing tumor"),
+            ],
+        ),
+        (
+            resized_img[:, :, world["current"], 2],
             [
                 (seg_data[56:184, 56:184, world["current"]] == 1, "tumor core"),
                 (seg_data[56:184, 56:184, world["current"]] == 2, "peritumoral edema"),
                 (seg_data[56:184, 56:184, world["current"]] == 3, "enchancing tumor"),
             ],
-    )]
-    
+        ),
+    ]
 
 
 def render(slider, state):
@@ -125,21 +127,24 @@ def render(slider, state):
     if resized_img is None or final_image is None:
         gr.Warning("No predicted data is available")
 
-    return [(resized_img[:, :, slider, 2],
-        [
-            ((final_image[:, :, slider] == 1), "tumor core"),
-            ((final_image[:, :, slider] == 2), "peritumoral edema"),
-            ((final_image[:, :, slider] == 4), "enchancing tumor"),
-        ],
-    ), (
+    return [
+        (
+            resized_img[:, :, slider, 2],
+            [
+                ((final_image[:, :, slider] == 1), "tumor core"),
+                ((final_image[:, :, slider] == 2), "peritumoral edema"),
+                ((final_image[:, :, slider] == 4), "enchancing tumor"),
+            ],
+        ),
+        (
             resized_img[:, :, slider, 2],
             [
                 (seg_data[56:184, 56:184, slider] == 1, "tumor core"),
                 (seg_data[56:184, 56:184, slider] == 2, "peritumoral edema"),
-                (seg_data[56:184, 56:184, slider] == 3, "enchancing tumor"),
+                (seg_data[56:184, 56:184, slider] == 4, "enchancing tumor"),
             ],
-        )]
-    
+        ),
+    ]
 
 
 with gr.Blocks() as demo:
@@ -165,12 +170,16 @@ with gr.Blocks() as demo:
         )
         state = gr.State(0)
         with gr.Row():
-            seg_res = gr.AnnotatedImage(height="500px")
-            seg_tru = gr.AnnotatedImage(height="500px")
+            seg_res = gr.AnnotatedImage(height="500px", label="Predicted Segmentation")
+            seg_tru = gr.AnnotatedImage(
+                height="500px", label="Ground Truth Segmentation"
+            )
 
     upload.click(load_data, inputs=[t1ce, t2, flair, seg], outputs=[seg_res, seg_tru])
 
-    slider.change(render, inputs=[slider, state], outputs=[seg_res, seg_tru], api_name="render")
+    slider.change(
+        render, inputs=[slider, state], outputs=[seg_res, seg_tru], api_name="render"
+    )
 
 
 if __name__ == "__main__":
