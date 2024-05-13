@@ -107,7 +107,7 @@ def load_data(t1ce, t2, flair, seg):
             (final_image[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
     ), (
-         resized_img[:, :, slider, 2],
+         resized_img[:, :, world["current"], 2],
             [
                 (seg_data[:, :, world["current"]] == 1, "tumor core"),
                 (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
