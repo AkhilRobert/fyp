@@ -106,11 +106,6 @@ def load_data(t1ce, t2, flair, seg):
             (final_image[:, :, world["current"]] == 2, "peritumoral edema"),
             (final_image[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
-        [
-            (seg_data[:, :, world["current"]] == 1, "tumor core"),
-            (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
-            (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
-        ],
     ), (
          resized_img[:, :, slider, 2],
             [
@@ -136,11 +131,6 @@ def render(slider, state):
             ((final_image[:, :, slider] == 1), "tumor core"),
             ((final_image[:, :, slider] == 2), "peritumoral edema"),
             ((final_image[:, :, slider] == 4), "enchancing tumor"),
-        ],
-        [
-            (seg_data[:, :, world["current"]] == 1, "tumor core"),
-            (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
-            (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
     ),
 
