@@ -16,17 +16,19 @@ world: Dict[Any, Any] = {
 config = Settings
 
 
-def load_data(t1ce, t2, flair):
+def load_data(t1ce, t2, flair, seg):
     global world
     t1ce_path = t1ce.name
     t2_path = t2.name
     flair_path = flair.name
+    seg_path = seg.name
 
     print(t1ce_path, t2_path, flair_path)
 
     t1ce_data = normalize(nibabel.load(t1ce_path).get_fdata()).astype(np.float32)
     t2_data = normalize(nibabel.load(t2_path).get_fdata()).astype(np.float32)
     flair_data = normalize(nibabel.load(flair_path).get_fdata()).astype(np.float32)
+    seg_data = nibabel.load(seg_path).get_fdata()
     # t2_data = nibabel.load(
     #     "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_t2.nii.gz"
     # ).get_fdata()
@@ -95,6 +97,7 @@ def load_data(t1ce, t2, flair):
             final_image[:, :, i] = prediction
 
     world["final_image"] = final_image
+    world["original"] = seg_data
 
     return (
         resized_img[:, :, world["current"], 2],
@@ -103,12 +106,18 @@ def load_data(t1ce, t2, flair):
             (final_image[:, :, world["current"]] == 2, "peritumoral edema"),
             (final_image[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
+        [
+            (seg_data[:, :, world["current"]] == 1, "tumor core"),
+            (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
+            (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
+        ],
     )
 
 
 def render(slider, state):
     resized_img = world["resized_img"]
     final_image = world["final_image"]
+    seg_data = world["seg_data"]
 
     if resized_img is None or final_image is None:
         gr.Warning("No predicted data is available")
@@ -119,6 +128,11 @@ def render(slider, state):
             ((final_image[:, :, slider] == 1), "tumor core"),
             ((final_image[:, :, slider] == 2), "peritumoral edema"),
             ((final_image[:, :, slider] == 4), "enchancing tumor"),
+        ],
+        [
+            (seg_data[:, :, world["current"]] == 1, "tumor core"),
+            (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
+            (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
     )
 
@@ -137,6 +151,7 @@ with gr.Blocks() as demo:
         t1ce = gr.File(label="upload t1ce scan")
         t2 = gr.File(label="upload t2 scan")
         flair = gr.File(label="upload flair scan")
+        seg = gr.File(label="upload segmentation mask")
 
     with gr.Column():
         upload = gr.Button(value="predict")
@@ -144,9 +159,11 @@ with gr.Blocks() as demo:
             0, 154, step=1, label="select the slice you want to visualize", value=70
         )
         state = gr.State(0)
-        seg_res = gr.AnnotatedImage(height="500px")
+        with gr.Column():
+            seg_res = gr.AnnotatedImage(height="500px")
+            seg_tru = gr.AnnotatedImage(height="500px")
 
-    upload.click(load_data, inputs=[t1ce, t2, flair], outputs=[seg_res])
+    upload.click(load_data, inputs=[t1ce, t2, flair, seg], outputs=[seg_res, seg_tru])
 
     slider.change(render, inputs=[slider, state], outputs=[seg_res], api_name="render")
 
