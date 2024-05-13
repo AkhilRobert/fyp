@@ -28,13 +28,13 @@ def main(config):
     model.load_state_dict(weights)
 
     t2 = nibabel.load(
-        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_t2.nii.gz"
+        "./sample_data/00495/BraTS2021_00495_t2.nii.gz"
     ).get_fdata()
     t1 = nibabel.load(
-        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_t1ce.nii.gz"
+        "./sample_data/00495/BraTS2021_00495_t1ce.nii.gz"
     ).get_fdata()
     flair = nibabel.load(
-        "./data/unprocessed/BraTS2021_00051/BraTS2021_00051_flair.nii.gz"
+        "./sample_data/00495/BraTS2021_00495_flair.nii.gz"
     ).get_fdata()
 
     t2 = normalize(t2).astype(np.float32)
