@@ -99,7 +99,7 @@ def load_data(t1ce, t2, flair, seg):
     world["final_image"] = final_image
     world["original"] = seg_data
 
-    return (
+    return ((
         resized_img[:, :, world["current"], 2],
         [
             (final_image[:, :, world["current"]] == 1, "tumor core"),
@@ -111,18 +111,26 @@ def load_data(t1ce, t2, flair, seg):
             (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
             (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
+    ), (
+         resized_img[:, :, slider, 2],
+            [
+                (seg_data[:, :, world["current"]] == 1, "tumor core"),
+                (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
+                (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
+            ],
+    )
     )
 
 
 def render(slider, state):
     resized_img = world["resized_img"]
     final_image = world["final_image"]
-    seg_data = world["seg_data"]
+    seg_data = world["original"]
 
     if resized_img is None or final_image is None:
         gr.Warning("No predicted data is available")
 
-    return (
+    return ((
         resized_img[:, :, slider, 2],
         [
             ((final_image[:, :, slider] == 1), "tumor core"),
@@ -134,6 +142,16 @@ def render(slider, state):
             (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
             (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
         ],
+    ),
+
+        (
+            resized_img[:, :, slider, 2],
+            [
+                (seg_data[:, :, world["current"]] == 1, "tumor core"),
+                (seg_data[:, :, world["current"]] == 2, "peritumoral edema"),
+                (seg_data[:, :, world["current"]] == 3, "enchancing tumor"),
+            ],
+        )
     )
 
 
@@ -159,13 +177,13 @@ with gr.Blocks() as demo:
             0, 154, step=1, label="select the slice you want to visualize", value=70
         )
         state = gr.State(0)
-        with gr.Column():
+        with gr.Row():
             seg_res = gr.AnnotatedImage(height="500px")
             seg_tru = gr.AnnotatedImage(height="500px")
 
     upload.click(load_data, inputs=[t1ce, t2, flair, seg], outputs=[seg_res, seg_tru])
 
-    slider.change(render, inputs=[slider, state], outputs=[seg_res], api_name="render")
+    slider.change(render, inputs=[slider, state], outputs=[seg_res, seg_tru], api_name="render")
 
 
 if __name__ == "__main__":
