@@ -48,7 +48,7 @@ class FocalLoss(nn.Module):
                 Defaults to -100.
         """
         if reduction not in ("mean", "sum", "none"):
-            raise ValueError('Reduction must be one of: "mean", "sum", "none".')
+            raise ValueError('Reduction must be one of "mean", "sum", "none".')
 
         super().__init__()
         self.alpha = alpha
@@ -96,6 +96,12 @@ class FocalLoss(nn.Module):
 
         # the full loss: -alpha * ((1 - pt)^gamma) * log(pt)
         loss = focal_term * ce
+
+        if False:
+            if self.reduction == "mean":
+                loss = loss.mean()
+            elif self.reduction == "sum":
+                loss = loss.sum()
 
         if self.reduction == "mean":
             loss = loss.mean()
