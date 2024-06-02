@@ -776,7 +776,7 @@ class UNet(nn.Module):
         self.load_ckpt_path = load_ckpt_path
         self.num_classes = num_classes
 
-        self.vmunet = VSSM(
+        self.unet = VSSM(
             in_chans=input_channels,
             num_classes=num_classes,
             depths=depths,
@@ -787,7 +787,7 @@ class UNet(nn.Module):
     def forward(self, x):
         if x.size()[1] == 1:
             x = x.repeat(1, 3, 1, 1)
-        logits = self.vmunet(x)
+        logits = self.unet(x)
         if self.num_classes == 1:
             return torch.sigmoid(logits)
         else:
@@ -797,7 +797,7 @@ class UNet(nn.Module):
         if self.load_ckpt_path is None:
             return
 
-        model_dict = self.vmunet.state_dict()
+        model_dict = self.unet.state_dict()
         modelCheckpoint = torch.load(self.load_ckpt_path)
         pretrained_dict = modelCheckpoint["model"]
         new_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
@@ -807,7 +807,7 @@ class UNet(nn.Module):
                 len(model_dict), len(pretrained_dict), len(new_dict)
             )
         )
-        self.vmunet.load_state_dict(model_dict)
+        self.unet.load_state_dict(model_dict)
 
         not_loaded_keys = [
             k for k in pretrained_dict.keys() if k not in new_dict.keys()
@@ -815,7 +815,7 @@ class UNet(nn.Module):
         print("Not loaded keys:", not_loaded_keys)
         print("encoder loaded finished!")
 
-        model_dict = self.vmunet.state_dict()
+        model_dict = self.unet.state_dict()
         modelCheckpoint = torch.load(self.load_ckpt_path)
         pretrained_odict = modelCheckpoint["model"]
         pretrained_dict = {}
@@ -839,7 +839,7 @@ class UNet(nn.Module):
                 len(model_dict), len(pretrained_dict), len(new_dict)
             )
         )
-        self.vmunet.load_state_dict(model_dict)
+        self.unet.load_state_dict(model_dict)
 
         not_loaded_keys = [
             k for k in pretrained_dict.keys() if k not in new_dict.keys()
